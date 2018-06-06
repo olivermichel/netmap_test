@@ -13,6 +13,8 @@
 
 #include <poll.h>
 
+#include <chrono>
+
 #include "netmap_iface.h"
 
 bool stop = false;
@@ -29,6 +31,11 @@ int main()
 
 	netmap_iface nm("enp6s0f1");
 
+	std::cout << "receiver: " << nm.count_tx_rings() << " tx rings, " << nm.count_rx_rings()
+			<< " rx rings" << std::endl;
+
+	unsigned long long pkt_count = 0;
+
 	while (!stop) {
 
 		struct pollfd pfd[1];
@@ -42,6 +49,8 @@ int main()
 		} else if (ret == 0) {
 			continue; // timeout
 		}
+
+		auto start = std::chrono::high_resolution_clock::now();
 
 		unsigned head = nm.rx_rings[0]->head;
 		unsigned tail = nm.rx_rings[0]->tail;
@@ -57,7 +66,13 @@ int main()
 				if (ip->protocol == IPPROTO_UDP) {
 					auto udp = (struct udphdr*) (rx_buf + sizeof(ether_header) + sizeof(iphdr));
 
-					std::cout << "UDP: " << udp->uh_sport << " -> " << udp->uh_dport << std::endl;
+					if (pkt_count++ % 1000000 == 0) {
+						auto end = std::chrono::high_resolution_clock::now();
+						auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+						double time_s = (double) dur.count() / 1000000;
+
+						std::cout << pkt_count << ": " << time_s << std::endl;
+					}
 				}
 			}
 		}

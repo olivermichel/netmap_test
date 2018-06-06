@@ -28,6 +28,9 @@ int main(int argc, char** argv)
 
 	netmap_iface nm("enp6s0f0");
 
+	std::cout << "sender: " << nm.count_tx_rings() << " tx rings, " << nm.count_rx_rings()
+			  << " rx rings" << std::endl;
+
 	char pkt_buf[1500] = { '\0' };
 	auto eth = (struct ether_header*) pkt_buf;
 	unsigned short pkt_len = sizeof(ether_header);
