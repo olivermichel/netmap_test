@@ -95,8 +95,7 @@ int main(int argc, char** argv)
 			memcpy(tx_buf, pkt_buf, pkt_len);
 			slot->len = pkt_len;
 		}
-
-		nm.tx_rings[0]->cur = nm.tx_rings[0]->head = head;
+		ioctl(nm.fd(), NIOCTXSYNC);
 	}
 
 	return 0;

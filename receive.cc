@@ -77,6 +77,7 @@ int main()
 			}
 		}
 		nm.rx_rings[0]->cur = nm.rx_rings[0]->head = head;
+		ioctl(nm.fd(), NIOCRXSYNC);
 	}
 
 	return 0;
